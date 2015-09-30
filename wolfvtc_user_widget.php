@@ -1,5 +1,5 @@
 <?php
-defined( 'ABSPATH' ) or die( 'No direct access! Bad user!');
+defined('ABSPATH') or die('No direct access! Bad user!');
 
 class wolfvtc_widget extends WP_Widget {
 
@@ -35,7 +35,6 @@ class wolfvtc_widget extends WP_Widget {
     function widget($args, $instance) {
         extract( $args );
 
-        // Title
         $title = apply_filters('widget_title', $instance['title']);
         echo $before_widget;
         echo '<div class="widget-text wp_widget_plugin_box">';
@@ -51,35 +50,31 @@ class wolfvtc_widget extends WP_Widget {
         if (is_user_logged_in()) { //If yes, do this
             echo '
             <a href="' . admin_url() . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Dashboard"></a>
-            <a href="' . site_url() . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Jobs"></a>
+            <a href="' . admin_url('options-general.php?page=wolfvtc&do=jobs') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Jobs"></a>
             ';
             if (get_option('wolftvc_divisionsenabled') != FALSE) {
-                echo '<a href="' . site_url() . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Divisons"></a>';
+                echo '<a href="' . admin_url('options-general.php?page=wolfvtc&do=div') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Divisons"></a>';
             }
             echo '
-            <a href="' . admin_url('options-general.php?page=wolfvtc') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="VTC Admin"></a>
-            <a href="' . wp_logout_url( get_permalink()) . '"><input type="button" class="button-primary" style="width:100%" value="Log out"></a>
+            <a href="' . admin_url('options-general.php?page=wolfvtcadmin') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="VTC Admin"></a>
+            <a href="' . wp_logout_url(get_permalink()) . '"><input type="button" class="button-primary" style="width:100%" value="Log out"></a>
             ';
         } else { //Else display this
-            $loginargs = array(
-            'echo'           => true,
-            'redirect' => ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
-            'form_id'        => 'loginform',
-            'label_username' => __( 'Username' ),
-            'label_password' => __( 'Password' ),
-            'label_remember' => __( 'Remember Me' ),
-            'label_log_in'   => __( 'Log In' ),
-            'id_username'    => 'user_login',
-            'id_password'    => 'user_pass',
-            'id_remember'    => 'rememberme',
-            'id_submit'      => 'wp-submit',
-            'remember'       => true,
-            'value_username' => '',
-            'value_remember' => true,
-            );
-            wp_login_form($loginargs);
+            echo '<form method="post" action="' . wp_login_url(get_permalink()) . '" name="loginform">
+                <label>Username</label>
+                <input class="input" type="text" name="log" style="width:100%">
 
-            echo '<a href="' . wp_registration_url( get_permalink()) . '"><input type="button" class="button-primary" style="width:100%" value="Register"></a>';
+                <label>Password</label>
+                <input class="input" type="password" name="pwd" style="width:100%">
+
+                <input type="checkbox" value="forever" checked="checked" name="rememberme">
+                <label>Remember me</label>
+
+                <input type="submit" class="button-primary" style="width:100%" value="Sign in">
+            </form>
+            ';
+
+            echo '<a href="' . wp_registration_url(get_permalink()) . '"><input type="button" class="button-primary" style="width:100%;margin-top:2px" value="Register"></a>';
         }
         echo '</div>';
         echo $after_widget;
