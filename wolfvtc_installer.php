@@ -11,8 +11,10 @@ function wolfvtc_install() {
     delete_option("wolfvtc_defaultdivision");
     add_option("wolfvtc_defaultdivision", 0);
 
-    delete_option("wolfvtc_dbversion");
-    add_option("wolfvtc_dbversion", 1);
+    if (get_option('wolftvc_divisionsenabled') != FALSE) {
+        delete_option("wolfvtc_dbversion");
+        add_option("wolfvtc_dbversion", 0);
+    }
 
     //Mysql
     $prefix = $wpdb->prefix . 'wolfvtc_';

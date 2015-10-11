@@ -49,18 +49,18 @@ class wolfvtc_widget extends WP_Widget {
         //Is user logged in?
         if (is_user_logged_in()) { //If yes, do this
             echo '
-            <a href="' . admin_url() . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Dashboard"></a>
-            <a href="' . admin_url('options-general.php?page=wolfvtc&do=jobs') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Jobs"></a>
+            <a href="' . admin_url('options-general.php?page=wolfvtc') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Dashboard"></a>
+            <a href="' . admin_url('options-general.php?page=wolfvtc&do=newjob') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Submit Job"></a>
             ';
             if (get_option('wolftvc_divisionsenabled') != FALSE) {
-                echo '<a href="' . admin_url('options-general.php?page=wolfvtc&do=div') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Divisons"></a>';
+                echo '<a href="' . admin_url('options-general.php?page=wolfvtc&do=divs') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Divisons"></a>';
             }
             echo '
             <a href="' . admin_url('options-general.php?page=wolfvtcadmin') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="VTC Admin"></a>
             <a href="' . wp_logout_url(get_permalink()) . '"><input type="button" class="button-primary" style="width:100%" value="Log out"></a>
             ';
         } else { //Else display this
-            echo '<form method="post" action="' . wp_login_url(get_permalink()) . '" name="loginform">
+            echo '<form method="post" action="' . wp_login_url() . '" name="loginform">
                 <label>Username</label>
                 <input class="input" type="text" name="log" style="width:100%">
 

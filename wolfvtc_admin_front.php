@@ -8,13 +8,44 @@ function wolfvtc_admin_menu() {
 }
 
 function wolfvtc_admin_front() {
+	global $wpdb;
+
 	echo '<div class="wrap">
 	<h1>WolfVTC Admin Panel</h1>';
 	if (get_option("wolfvtc_setup") == FALSE) {
 		echo '<div style="width:60%;margin-left:20%;margin-right:20%;background-color:#2980b9;text-align:center"><h1 style="color:#ffffff">WolfVTC is now installed.</h1></div>
 		<p>We recommend that you add the User Panel widget added by the WolfVTC plugin to the sidebar and turn on the WordPress option allowing everyone to register.</p>
-		<p>Changing the registration setting can be done under General Settings, and adding the widget can be done under Appearances->Widgets, both here in the WP Dashboard.
+		<p>Changing the registration setting can be done under General Settings, and adding the widget can be done under Appearances->Widgets, both here in the WP Dashboard.</p>
 		<p><a href="?page=wolfvtcadmin"><input type="button" class="button-primary" style="width:100%" value="Go to control panel"></a></p>';
+
+		if (get_option("wolfvtc_dbversion") < 1) {
+			include 'wolfvtc_cities.php';
+			foreach ($cities as $c) {
+				$wpdb->insert( 
+					$wpdb->prefix . 'wolfvtc_cities', 
+					array( 
+						'cityname' => $c,
+					) 
+				);
+			}
+			delete_option("wolfvtc_dbversion");
+    		add_option("wolfvtc_dbversion", 1);
+		}
+
+		$wpdb->insert( 
+			$wpdb->prefix . 'wolfvtc_users', 
+			array( 
+				'userid' => get_current_user_id(), 
+				'division' => 0, 
+				'divisionmember' => 0, 
+				'divisionadmin' => 0, 
+				'fullmember' => 1, 
+				'adminjobs' => 1, 
+				'adminusers' => 1, 
+				'admindiv' => 1, 
+				'admincc' => 1, 
+			) 
+		);
 
 		delete_option("wolfvtc_setup");
 		add_option("wolfvtc_setup", TRUE);
@@ -41,7 +72,20 @@ function wolfvtc_admin_front() {
 		echo '<a href="?page=wolfvtcadmin&do=cargo"><input type="button" class="button-primary" style="width:100%" value="Add cargo types"></a>
 		<p>Add new cargo types to the system. Useful if a cargo type is missing, or if a new DLC is released.</p>';
 	} elseif ($_GET['do'] == "options") {
+		echo '<h3>VTC Options</h3>';
 
+	} elseif ($_GET['do'] == "jobs") {
+
+	} elseif ($_GET['do'] == "div") {
+
+	} elseif ($_GET['do'] == "users") {
+
+	} elseif ($_GET['do'] == "cities") {
+
+	} elseif ($_GET['do'] == "cargo") {
+
+	} else {
+		echo '<p>404 - Page not found.</p>';
 	}
 	echo '</div>';
 }
