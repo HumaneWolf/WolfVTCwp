@@ -6,14 +6,11 @@ function wolfvtc_install() {
 
     //Options
     delete_option("wolfvtc_divisionsenabled");
-    add_option("wolfvtc_divisionsenabled", 0);
+    add_option("wolfvtc_divisionsenabled", "0");
 
-    delete_option("wolfvtc_defaultdivision");
-    add_option("wolfvtc_defaultdivision", 0);
-
-    if (get_option('wolftvc_divisionsenabled') != FALSE) {
+    if (get_option('wolfvtc_dbversion') == FALSE) {
         delete_option("wolfvtc_dbversion");
-        add_option("wolfvtc_dbversion", 0);
+        add_option("wolfvtc_dbversion", "0");
     }
 
     //Mysql

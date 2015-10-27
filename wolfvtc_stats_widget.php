@@ -49,7 +49,7 @@ class wolfvtc_stats_widget extends WP_Widget {
         echo '<p><strong>Drivers:</strong> ' . wolfvtc_drivers() . '</p>';
         echo '<p><strong>Cargo delivered:</strong> ' . wolfvtc_jobs() . '</p>';
         echo '<p><strong>Kilometres driven:</strong> ' . wolfvtc_kmdriven() . ' Km</p>';
-        if (get_option('wolftvc_divisionsenabled') != FALSE) {
+        if (get_option("wolfvtc_divisionsenabled") != 0) {
             echo '<p><strong>Divisions:</strong> ' . wolfvtc_divisions() . '</p>';
         }
 
