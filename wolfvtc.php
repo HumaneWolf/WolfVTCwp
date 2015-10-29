@@ -24,7 +24,6 @@ require("wolfvtc_functions.php");
 
 //CLASSES
 
-
 //WIDGETS
 require("wolfvtc_user_widget.php"); // User panel widget
 require("wolfvtc_stats_widget.php"); // Stats widget

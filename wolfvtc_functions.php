@@ -63,6 +63,18 @@ function wolfvtc_hasperm($userid, $perm = "all") {
 			} else {
 				return FALSE;
 			}
+		} elseif ($perm == "divmember") {
+			if ($u['divisionmember'] == TRUE) {
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		} elseif ($perm == "divadmin") {
+			if ($u['divisionadmin'] == TRUE) {
+				return TRUE;
+			} else {
+				return FALSE;
+			}
 		} elseif ($perm == "jobs") {
 			if ($u['adminjobs'] == TRUE) {
 				return TRUE;
@@ -127,6 +139,15 @@ function wolfvtc_userkmdriven($userid) {
 	}
 }
 
+//User division
+function wolfvtc_userdiv($userid) {
+	global $wpdb;
+
+	$u = $wpdb->get_var('SELECT division FROM ' . $wpdb->prefix . 'wolfvtc_users WHERE userid=' . intval($userid));
+
+	return $u;
+}
+
 //
 // CITY AND CARGO
 //
@@ -160,6 +181,7 @@ function wolfvtc_cargoname($id) {
 //
 // DIVISIONS
 //
+
 function wolfvtc_divname($id) {
 	if ($id == 0) {
 		return "None";

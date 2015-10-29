@@ -53,7 +53,11 @@ class wolfvtc_widget extends WP_Widget {
             <a href="' . admin_url('admin.php?page=wolfvtc&do=newjob') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Submit Job"></a>
             ';
             if (get_option("wolfvtc_divisionsenabled") != 0) {
-                echo '<a href="' . admin_url('admin.php?page=wolfvtc&do=divs') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Divisons"></a>';
+                if (wolfvtc_userdiv(get_current_user_id()) != 0) {
+                    echo '<a href="' . admin_url('admin.php?page=wolfvtc&do=mydiv') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="My Division"></a>';
+                } else {
+                    echo '<a href="' . admin_url('admin.php?page=wolfvtc&do=divs') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="Divisions"></a>';
+                }
             }
             echo '
             <a href="' . admin_url('admin.php?page=wolfvtcadmin') . '"><input type="button" class="button-primary" style="width:100%;margin-bottom:5px" value="VTC Admin"></a>

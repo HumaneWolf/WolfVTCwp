@@ -31,11 +31,13 @@ function wolfvtc_dash_front() {
 				<p>View all your job reports.</p>';
 
 				if (get_option("wolfvtc_divisionsenabled") != 0) {
-					echo '<a href="?page=wolfvtc&do=mydiv"><input type="button" class="button-primary" style="width:100%" value="My division"></a>
-					<p>My division dashboard.</p>
-
-					<a href="?page=wolfvtc&do=divs"><input type="button" class="button-primary" style="width:100%" value="Join division"></a>
+					if (wolfvtc_userdiv(get_current_user_id()) != 0) {
+						echo '<a href="?page=wolfvtc&do=mydiv"><input type="button" class="button-primary" style="width:100%" value="My division"></a>
+					<p>My division dashboard.</p>';
+					} else {
+						echo '<a href="?page=wolfvtc&do=divs"><input type="button" class="button-primary" style="width:100%" value="Join division"></a>
 					<p>Join a division.</p>';
+					}
 				}
 			} else {
 				echo '<p><strong>Your account is not a full member of the VTC, so you may not submit jobs.</strong></p>';
@@ -60,7 +62,7 @@ function wolfvtc_dash_front() {
 			<a href="?page=wolfvtc"><input type="button" class="button-primary" style="width:100%" value="Browse my member dashboard"></a>';
 		}
 		echo '<a href="' . home_url() . '"><input type="button" class="button-primary" style="width:100%;margin-top:20px" value="Front page"></a>';
-	} elseif ($_GET['do'] == "about") {
+	} elseif ($_GET['do'] == "about") { //MY PROFILE PAGE
 		$user = wp_get_current_user();
 		echo '<h3>User profile</h3>
 		<p><strong>User ID:</strong> ' . $user->ID . '</p>
@@ -72,10 +74,23 @@ function wolfvtc_dash_front() {
 			echo 0;
 		}
 		echo ' Km</p>';
-		//TODO: Division name.
+
+		if (get_option("wolfvtc_divisionsenabled") != 0) {
+			if (wolfvtc_hasperm(get_current_user_id(), "divmember")) {
+				$rank = "Approved";
+				if (wolfvtc_hasperm(get_current_user_id(), "divadmin")) {
+					$rank .= ", admin";
+				}
+			} else {
+				$rank = "Not approved";
+			}
+			$divid = wolfvtc_userdiv(get_current_user_id());
+			echo '<p><strong>Division:</strong> ' . wolfvtc_divname($divid) . ' (' . $rank . ')</p>';
+		}
+
 		echo '<p><strong>Permissions</strong></p>
 		<ul style="list-style-type:disc;margin-left:20px">';
-		if (wolfvtc_hasperm(get_current_user_id(), "fullmember")) {
+		if (wolfvtc_hasperm(get_current_user_id(), "fullmember")) {//check each permission
 			echo '<li>Can submit jobs and join divisions</li>';
 		}
 		if (wolfvtc_hasperm(get_current_user_id(), "jobs")) {
@@ -93,14 +108,308 @@ function wolfvtc_dash_front() {
 		if (wolfvtc_hasperm(get_current_user_id(), "super")) {
 			echo '<li>Can edit VTC settings</li>';
 		}
-		if (wolfvtc_hasperm(get_current_user_id(), "all") == FALSE && wolfvtc_hasperm(get_current_user_id(), "fullmember") == FALSE) {
+
+		if (wolfvtc_hasperm(get_current_user_id(), "all") == FALSE && wolfvtc_hasperm(get_current_user_id(), "fullmember") == FALSE) { //If (s)he doesn't have any permissions
 			echo '<li>None</li>';
 		}
+
 		echo '</ul>';
 
 	} elseif ($_GET['do'] == "newjob" && wolfvtc_hasperm(get_current_user_id(), "fullmember")) {
+		$userdata['fromcity'] = 0;
+		$userdata['tocity'] = 0;
+		$userdata['cargo'] = 0;
 
-	} elseif ($_GET['do'] == "myjobs" && wolfvtc_hasperm(get_current_user_id(), "fullmember")) {
+		$userdata['distance'] = "";
+		$userdata['earnings'] = "";
+
+		$userdata['notes'] = "";
+
+		$userdata['fuelcosts'] = "";
+		$userdata['repaircosts'] = "";
+		$userdata['travelcosts'] = "";
+
+		$userdata['div'] = "";
+
+		$error['is'] = FALSE;
+		$error['msg'] = "";
+
+		if (isset($_POST['submitted'])) {
+			//From city
+			if (isset($_POST['fromcity']) && intval($_POST['fromcity']) > 0 && wolfvtc_cityname(intval($_POST['fromcity'])) != FALSE) {
+				$userdata['fromcity'] = intval($_POST['fromcity']);
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must select the city you picked up your load from.</p>';
+			}
+
+			//tocity
+			if (isset($_POST['tocity']) && intval($_POST['tocity']) > 0 && wolfvtc_cityname(intval($_POST['tocity'])) != FALSE) {
+				$userdata['tocity'] = intval($_POST['tocity']);
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must select the city you deliverd your load to.</p>';
+			}
+
+			//cargo
+			if (isset($_POST['cargo']) && intval($_POST['cargo']) > 0 && wolfvtc_cargoname(intval($_POST['cargo'])) != FALSE) {
+				$userdata['cargo'] = intval($_POST['cargo']);
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must select your load type.</p>';
+			}
+
+
+			//distance
+			if (isset($_POST['distance']) && intval($_POST['distance']) > 0) {
+				if (intval($_POST['distance']) < 1000000) {
+					$userdata['distance'] = intval($_POST['distance']);
+				} else {
+					$error['is'] = TRUE;
+					$error['msg'] .= '<p>Are you sure you drove that far?</p>';
+				}
+				
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must enter your distance.</p>';
+			}
+
+
+			//earnings
+			if (isset($_POST['earnings']) && intval($_POST['earnings']) > 0) {
+				if (intval($_POST['earnings']) < 1000000) {
+					$userdata['earnings'] = intval($_POST['earnings']);
+				} else {
+					$error['is'] = TRUE;
+					$error['msg'] .= '<p>Are you sure you earned a million euros?</p>';
+				}
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must enter your earnings.</p>';
+			}
+
+
+			//Other notes
+			if (isset($_POST['notes'])) {
+				if (strlen($_POST['notes']) <= 250) {
+					$userdata['notes'] = htmlspecialchars($_POST['notes']);
+				} else {
+					$error['is'] = TRUE;
+					$error['msg'] .= '<p>The note can be no more than 250 characters.</p>';
+				}
+			}
+
+
+			//fuelcosts
+			if (isset($_POST['fuelcosts']) && intval($_POST['fuelcosts']) >= 0) {
+				if (intval($_POST['fuelcosts']) < 10000) {
+					$userdata['fuelcosts'] = intval($_POST['fuelcosts']);
+				} else {
+					$error['is'] = TRUE;
+					$error['msg'] .= '<p>That\'s a lot of fuel. Sure you used that much?</p>';
+				}
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must enter your fuel costs</p>';
+			}
+
+			//repaircosts
+			if (isset($_POST['repaircosts']) && intval($_POST['repaircosts']) >= 0) {
+				if (intval($_POST['repaircosts']) < 500000) {
+					$userdata['repaircosts'] = intval($_POST['repaircosts']);
+				} else {
+					$error['is'] = TRUE;
+					$error['msg'] .= '<p>You seem to have spent a lot on repairs.</p>';
+				}
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must enter your repair costs.</p>';
+			}
+
+			//travelcosts
+			if (isset($_POST['travelcosts']) && intval($_POST['travelcosts']) >= 0) {
+				if (intval($_POST['travelcosts']) < 10000) {
+					$userdata['travelcosts'] = intval($_POST['travelcosts']);
+				} else {
+					$error['is'] = TRUE;
+					$error['msg'] .= '<p>That\'s a lot of ferries and toll booths. Are you sure you paid that much?</p>';
+				}
+			} else {
+				$error['is'] = TRUE;
+				$error['msg'] .= '<p>You must enter your travel costs.</p>';
+			}
+
+			//Division
+			if (isset($_POST['div'])) {
+				$div = wolfvtc_userdiv(get_current_user_id());
+				if (get_option("wolfvtc_divisionsenabled") != 0 && $div != 0 && wolfvtc_hasperm(get_current_user_id(), "divmember")) { //check if it's enabled and user is in a division
+					$userdata['div'] = $div;
+				} else {
+					$userdata['div'] = 0;
+				}
+			} else {
+				$userdata['div'] = 0;
+			}
+
+			//Submit?
+			if ($error['is'] == FALSE) {
+				$wpdb->insert(
+					$wpdb->prefix . 'wolfvtc_jobs',
+					array(
+						'userid' => get_current_user_id(), //userid INT
+						'fromcity' => $userdata['fromcity'], // from city INT
+						'tocity' => $userdata['tocity'], //to city INT
+						'cargo' => $userdata['cargo'], //cargo INT
+						'distance' => $userdata['distance'], //distance INT
+						'earnings' => $userdata['earnings'], //earnings INT
+						'notes' => $userdata['notes'], //notes STRING
+						'fuelcosts' => $userdata['fuelcosts'], //fuel INT
+						'repaircosts' => $userdata['repaircosts'], //repair INT
+						'travelcosts' => $userdata['travelcosts'], //travel INT
+						'approved' => 0, //nope, INT, bool
+						'approvedby' => 0, //nope, INT
+						'addedtime' => current_time('mysql'), //time, STRING
+						'divid' => $userdata['div'], //division INT
+						),
+					array(
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%s', //NOTES
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%s', //TIME
+						'%d',
+						)
+					);
+				echo '<div style="background-color:darkgreen;color:#FFFFFF;padding:10px"><p><strong>Job Saved.</strong></p></div>';
+			} else {
+				echo '<div style="background-color:darkred;color:#FFFFFF;padding:10px"><p><strong>Please fix the following:</strong></p>' . $error['msg'] . '</div>';
+			}
+		}
+
+		echo '<form action="?page=wolfvtc&do=newjob" method="post">
+		<table>';
+
+		//Load cities and make dropdown
+		echo '<tr>
+		<th>Load from:</th>
+		<td><select name="fromcity">';
+		$citiesdb = $wpdb->get_results('SELECT * FROM ' . $wpdb->prefix . 'wolfvtc_cities ORDER BY cityname ASC');
+		foreach ($citiesdb as $c) {
+			if ($c->cityid == $userdata['fromcity']) {
+				echo '<option value="' . $c->cityid . '" selected>' . $c->cityname . '</option>';
+			} else {
+				echo '<option value="' . $c->cityid . '">' . $c->cityname . '</option>';
+			}
+		}
+		echo '</select>
+		</td>
+		</tr>';
+
+		//And repeat it to make the to city dropdown
+		echo '<tr>
+		<th>Delivered to:</th>
+		<td><select name="tocity">';
+		foreach ($citiesdb as $c) {
+			if ($c->cityid == $userdata['tocity']) {
+				echo '<option value="' . $c->cityid . '" selected>' . $c->cityname . '</option>';
+			} else {
+				echo '<option value="' . $c->cityid . '">' . $c->cityname . '</option>';
+			}
+		}
+		echo '</select>
+		</td>
+		</tr>';
+
+		//Last but not least: Cargo dropdown
+		echo '<tr>
+		<th>Cargo:</th>
+		<td><select name="cargo">';
+		$cargodb = $wpdb->get_results('SELECT * FROM ' . $wpdb->prefix . 'wolfvtc_cargo ORDER BY cargoname ASC');
+		foreach ($cargodb as $c) {
+			if ($c->cityid == $userdata['cargo']) {
+				echo '<option value="' . $c->cargoid . '" selected>' . $c->cargoname . '</option>';
+			} else {
+				echo '<option value="' . $c->cargoid . '">' . $c->cargoname . '</option>';
+			}
+		}
+		echo '</select>
+		</td>
+		</tr>';
+
+		//Skip a row
+		echo '<tr><td style="height:15px"></td><td style="height:15px"></td></tr>';
+
+		//Distance
+		echo '<tr>
+		<th>Kilometres Driven:</th>
+		<td><input type="number" name="distance" value="' . $userdata['distance'] . '" placeholder="250"> Km</td>
+		</tr>';
+
+		//Earnings
+		echo '<tr>
+		<th>Earnings:</th>
+		<td><input type="number" name="earnings" value="' . $userdata['earnings'] . '" placeholder="30000"> €</td>
+		</tr>';
+
+		//fuelcosts
+		echo '<tr>
+		<th>Fuel costs:</th>
+		<td><input type="number" name="fuelcosts" value="' . $userdata['fuelcosts'] . '" placeholder="600"> €</td>
+		</tr>';
+
+		//repaircosts
+		echo '<tr>
+		<th>Repair costs:</th>
+		<td><input type="number" name="repaircosts" value="' . $userdata['repaircosts'] . '" placeholder="10000"> €</td>
+		</tr>';
+
+		//travelcosts
+		echo '<tr>
+		<th>Travel costs:</th>
+		<td><input type="number" name="travelcosts" value="' . $userdata['travelcosts'] . '" placeholder="350"> €</td>
+		</tr>';
+
+		//Skip a row
+		echo '<tr><td style="height:15px"></td><td style="height:15px"></td></tr>';
+
+		//Notes
+		echo '<tr>
+		<th>Other notes:</th>
+		<td><textarea name="notes">' . $userdata['notes'] . '</textarea></td>
+		</tr>';
+
+		//Div job?
+		if (get_option("wolfvtc_divisionsenabled") != 0 && wolfvtc_userdiv(get_current_user_id()) != 0 && wolfvtc_hasperm(get_current_user_id(), "divmember")) {
+			echo '<tr>
+			<th>Division job?</th>
+			<td>
+			<input type="checkbox" name="div" value="yessir"';
+			if (isset($userdata['div']) && $userdata['div'] != "") {
+				echo ' checked';
+			}
+			echo '></td>
+			</tr>';
+		}
+
+		//Skip a row then submit
+		echo '<tr><td style="height:15px"></td><td style="height:15px"></td></tr>
+		<input type="hidden" name="submitted" value="yessir">
+		<tr>
+		<td></td>
+		<td><input type="submit" value="Submit job"></td>
+		</tr>
+		</table>
+		</form>';
+
+	} elseif ($_GET['do'] == "myjobs" && wolfvtc_hasperm(get_current_user_id(), "fullmember")) { //ALL MY SUBMITTED JOBS
 		echo '<h3>My Jobs</h3>';
 		$q = 'SELECT * FROM ' . $wpdb->prefix . 'wolfvtc_jobs WHERE userid=' . intval(get_current_user_id()) . ' ORDER BY addedtime DESC';
 		$q = $wpdb->get_results($q);
@@ -164,9 +473,9 @@ function wolfvtc_dash_front() {
 
 		echo '</table>';
 
-	} elseif ($_GET['mydiv'] && wolfvtc_hasperm(get_current_user_id(), "fullmember") && get_option("wolfvtc_divisionsenabled") != 0) {
+	} elseif ($_GET['do'] == "mydiv" && wolfvtc_hasperm(get_current_user_id(), "fullmember") && wolfvtc_hasperm(get_current_user_id(), "divmember") && get_option("wolfvtc_divisionsenabled") != 0) {
 
-	} elseif ($_GET['divs'] && wolfvtc_hasperm(get_current_user_id(), "fullmember") && get_option("wolfvtc_divisionsenabled") != 0) {
+	} elseif ($_GET['do'] == "divs" && wolfvtc_hasperm(get_current_user_id(), "fullmember") && !wolfvtc_hasperm(get_current_user_id(), "divmember") && get_option("wolfvtc_divisionsenabled") != 0) {
 		
 	} else {
 		echo '<p>404 - Page not found.</p>';
