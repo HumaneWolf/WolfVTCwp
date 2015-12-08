@@ -39,6 +39,7 @@ function wolfvtc_install() {
         `adminusers` BOOLEAN NOT NULL DEFAULT FALSE,
         `admindiv` BOOLEAN NOT NULL DEFAULT FALSE,
         `admincc` BOOLEAN NOT NULL DEFAULT FALSE,
+        `superadmin` BOOLEAN NOT NULL DEFAULT FALSE,
         PRIMARY KEY (`userid`))
         ' . $collate;
 
