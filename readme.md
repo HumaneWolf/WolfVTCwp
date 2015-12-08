@@ -1,9 +1,9 @@
 # WolfVTC
 **[Download Wordpress](http://wordpress.org/)**
 
-**[Download WolfVTC](#)**
+**[Download WolfVTC](https://github.com/HumaneWolf/WolfVTCwp/releases/)**
 
-**[ETS2MP Forum](#)**
+**[ETS2MP Forum](http://forum.ets2mp.com/index.php?/topic/23434-wolfvtc-vtc-control-panel/)**
 
 **CURRENT VERSION: Public Beta 0.0.1**
 
@@ -23,3 +23,9 @@ Being website based, the system is easily accessible and does not require any do
 - Language translation support.
 - Support for company divisions.
 - Clean up some code.
+
+
+## License
+GNU GPLv3
+
+[License](http://www.gnu.org/licenses/gpl.html)
