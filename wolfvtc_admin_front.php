@@ -4,7 +4,7 @@ defined('ABSPATH') or die('No direct access! Bad user!');
 add_action('admin_menu', 'wolfvtc_admin_menu');
 
 function wolfvtc_admin_menu() {
-	if (wolfvtc_hasperm(get_current_user_id(), "all")) {
+	if (wolfvtc_hasperm(get_current_user_id(), "all") || get_option("wolfvtc_setup") == FALSE) {
 		add_menu_page('WolfVTC Admin', 'WolfVTC Admin', 'read', 'wolfvtcadmin', 'wolfvtc_admin_front', "", 1);
 	}
 }
