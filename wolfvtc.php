@@ -6,7 +6,7 @@
 Plugin Name: WolfVTC
 Plugin URI: http://humanewolf.com/projects/wolfvtc
 Description: VTC system for ETS2MP, plugin for wordpress.
-Version: 0.0.1 (Alpha)
+Version: Beta 0.0.1
 Author: HumaneWolf
 Author URI: http://humanewolf.com/
 */
