@@ -133,7 +133,17 @@ function wolfvtc_isuser($userid) {
 function wolfvtc_userkmdriven($userid) {
 	global $wpdb;
 
-	$d = $wpdb->get_col('SELECT sum(`distance`) FROM ' . $wpdb->prefix . 'wolfvtc_jobs WHERE approved=TRUE AND userid=' . intval(userid));
+	$d = $wpdb->get_col('SELECT sum(`distance`) FROM ' . $wpdb->prefix . 'wolfvtc_jobs WHERE approved=TRUE AND userid=' . intval($userid));
+	foreach ($d as $s) {
+		return $s;
+	}
+}
+
+//Number of jobs by user
+function wolfvtc_userjobs($userid) {
+	global $wpdb;
+
+	$d = $wpdb->get_col('SELECT count(*) FROM ' . $wpdb->prefix . 'wolfvtc_jobs WHERE approved=TRUE AND userid=' . intval($userid));
 	foreach ($d as $s) {
 		return $s;
 	}

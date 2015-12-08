@@ -334,7 +334,7 @@ function wolfvtc_dash_front() {
 		<td><select name="cargo">';
 		$cargodb = $wpdb->get_results('SELECT * FROM ' . $wpdb->prefix . 'wolfvtc_cargo ORDER BY cargoname ASC');
 		foreach ($cargodb as $c) {
-			if ($c->cityid == $userdata['cargo']) {
+			if ($c->cargoid == $userdata['cargo']) {
 				echo '<option value="' . $c->cargoid . '" selected>' . $c->cargoname . '</option>';
 			} else {
 				echo '<option value="' . $c->cargoid . '">' . $c->cargoname . '</option>';
@@ -474,9 +474,9 @@ function wolfvtc_dash_front() {
 		echo '</table>';
 
 	} elseif ($_GET['do'] == "mydiv" && wolfvtc_hasperm(get_current_user_id(), "fullmember") && wolfvtc_hasperm(get_current_user_id(), "divmember") && get_option("wolfvtc_divisionsenabled") != 0) {
-
+		echo "This page will display info about your current division and a couple of options.";
 	} elseif ($_GET['do'] == "divs" && wolfvtc_hasperm(get_current_user_id(), "fullmember") && !wolfvtc_hasperm(get_current_user_id(), "divmember") && get_option("wolfvtc_divisionsenabled") != 0) {
-		
+		echo 'This page will display a list of all available divisions to users who are not in one.';
 	} else {
 		echo '<p>404 - Page not found.</p>';
 	}
