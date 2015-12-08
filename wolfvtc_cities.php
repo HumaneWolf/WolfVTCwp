@@ -104,3 +104,6 @@
  $cities['102'] = "United Kingdom: Sheffield";
  $cities['103'] = "United Kingdom: Southampton";
  $cities['104'] = "United Kingdom: Swansea";
+
+ $cities['105'] = "Hungary: Pecs";
+ $cities['106'] = "Hungary: Szeged";
